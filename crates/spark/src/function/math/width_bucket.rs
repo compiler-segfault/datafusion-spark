@@ -251,7 +251,10 @@ macro_rules! width_bucket_kernel_impl {
                 }
                 let next_bucket = (buckets + 1) as i64;
                 if $check_nan {
-                    if !x.is_finite() || !l.is_finite() || !h.is_finite() {
+                    // Spark only rejects a NaN value here: an infinite value is
+                    // outside the range and falls into the below-min / above-max
+                    // checks below, giving 0 or num_bucket + 1.
+                    if x.is_nan() || !l.is_finite() || !h.is_finite() {
                         b.append_null();
                         continue;
                     }

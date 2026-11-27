@@ -91,6 +91,23 @@ SELECT width_bucket(5.0, 0.0, 'NaN'::DOUBLE, 5)
 ----
 NULL
 
+# An infinite value is out of range, not NULL: Spark returns 0 or num_bucket + 1
+query II
+SELECT width_bucket('Infinity'::DOUBLE, 0.0, 10.0, 5), width_bucket('-Infinity'::DOUBLE, 0.0, 10.0, 5)
+----
+6 0
+
+query II
+SELECT width_bucket('Infinity'::DOUBLE, 10.0, 0.0, 5), width_bucket('-Infinity'::DOUBLE, 10.0, 0.0, 5)
+----
+0 6
+
+# An infinite min or max still gives NULL
+query II
+SELECT width_bucket(5.0, '-Infinity'::DOUBLE, 10.0, 5), width_bucket(5.0, 0.0, 'Infinity'::DOUBLE, 5)
+----
+NULL NULL
+
 query I
 SELECT width_bucket(INTERVAL '1' YEAR, INTERVAL '5' YEAR, INTERVAL '5' YEAR, 10)
 ----
