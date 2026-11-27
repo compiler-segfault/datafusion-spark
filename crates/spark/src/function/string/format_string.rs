@@ -1785,16 +1785,21 @@ impl ConversionSpecifier {
                 // Manual scientific notation formatting for uppercase E
                 let mantissa = abs / 10.0_f64.powf(exponent as f64);
                 let exp_char = if upper { 'E' } else { 'e' };
-                number = format!("{mantissa:.prec$}", prec = precision as usize);
-                number = format!("{number}{exp_char}{exponent:+03}");
+                let mut mantissa = format!("{mantissa:.prec$}", prec = precision as usize);
+                // `#` asks for a decimal point in the mantissa. Appending it to
+                // the finished number would put it after the exponent.
+                if self.alt_form && !mantissa.contains('.') {
+                    mantissa.push('.');
+                }
+                number = format!("{mantissa}{exp_char}{exponent:+03}");
             } else {
                 number = format!("{abs:.prec$}", prec = precision as usize);
                 if self.grouping_separator {
                     number = insert_thousands_separator(&number);
                 }
-            }
-            if self.alt_form && !number.contains('.') {
-                number += ".";
+                if self.alt_form && !number.contains('.') {
+                    number += ".";
+                }
             }
         } else {
             // not finite

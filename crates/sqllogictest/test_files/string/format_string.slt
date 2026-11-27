@@ -2549,3 +2549,30 @@ query T
 SELECT format_string('Large octal: %o', 9223372036854775807::BIGINT);
 ----
 Large octal: 777777777777777777777
+
+
+# ================================
+# '#' flag with scientific notation
+# ================================
+
+## The decimal point belongs to the mantissa, not to the exponent
+query T
+SELECT format_string('%#.0e', CAST(5.0 AS DOUBLE));
+----
+5.e+00
+
+query T
+SELECT format_string('%#.0e', CAST(-5.0 AS DOUBLE));
+----
+-5.e+00
+
+## The default precision already has a decimal point
+query T
+SELECT format_string('%#e', CAST(5.0 AS DOUBLE));
+----
+5.000000e+00
+
+query T
+SELECT format_string('%#E', CAST(5.0 AS DOUBLE));
+----
+5.000000E+00
